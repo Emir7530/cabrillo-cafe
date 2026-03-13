@@ -2,6 +2,8 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import itemsRoutes from "./routes/itemsRoutes";
+import categoriesRoutes from "./routes/categoriesRoutes";
+import ordersRoutes from "./routes/ordersRoutes";
 
 dotenv.config();
 
@@ -16,6 +18,8 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("/api/items", itemsRoutes);
+app.use("/api/categories", categoriesRoutes);
+app.use("/api/orders", ordersRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
