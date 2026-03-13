@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import itemsRoutes from "./routes/itemsRoutes";
 
 dotenv.config();
 
@@ -13,6 +14,8 @@ app.use(express.json());
 app.get("/", (req: Request, res: Response) => {
   res.send("Cabrillo Cafe backend is running");
 });
+
+app.use("/api/items", itemsRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
