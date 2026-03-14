@@ -1,68 +1,59 @@
 import { Request, Response } from "express";
+import prisma from "../lib/prisma";
 
-type Category = {
-  id: number;
-  name: string;
-};
-
-let categories: Category[] = [
-  { id: 1, name: "Coffee" },
-  { id: 2, name: "Tea" },
-  { id: 3, name: "Pastry" },
-];
-
-export const getCategories = (req: Request, res: Response) => {
+export const getCategories = async (req: Request, res: Response) => {
+  const categories = await prisma.category.findMany();
   res.json(categories);
 };
 
-export const createCategory = (req: Request, res: Response) => {
+export const createCategory = async (req: Request, res: Response) => {
   const { name } = req.body;
 
   if (!name) {
     return res.status(400).json({ message: "Category name is required" });
   }
 
-  const newCategory: Category = {
-    id: categories.length + 1,
-    name,
-  };
+  try {
+    const newCategory = await prisma.category.create({
+      data: { name },
+    });
 
-  categories.push(newCategory);
-
-  res.status(201).json(newCategory);
+    res.status(201).json(newCategory);
+  } catch {
+    res.status(400).json({ message: "Category could not be created" });
+  }
 };
 
-export const updateCategory = (req: Request, res: Response) => {
+export const updateCategory = async (req: Request, res: Response) => {
   const categoryId = Number(req.params.id);
   const { name } = req.body;
 
-  const category = categories.find((c) => c.id === categoryId);
-
-  if (!category) {
-    return res.status(404).json({ message: "Category not found" });
+  if (!name) {
+    return res.status(400).json({ message: "Category name is required" });
   }
 
-  if (name !== undefined) {
-    category.name = name;
-  }
+  try {
+    const updatedCategory = await prisma.category.update({
+      where: { id: categoryId },
+      data: { name },
+    });
 
-  res.json(category);
+    res.json(updatedCategory);
+  } catch {
+    res.status(404).json({ message: "Category not found" });
+  }
 };
 
-export const deleteCategory = (req: Request, res: Response) => {
+export const deleteCategory = async (req: Request, res: Response) => {
   const categoryId = Number(req.params.id);
 
-  const index = categories.findIndex((c) => c.id === categoryId);
+  try {
+    await prisma.category.delete({
+      where: { id: categoryId },
+    });
 
-  if (index === -1) {
-    return res.status(404).json({ message: "Category not found" });
+    res.json({ message: "Category deleted successfully" });
+  } catch {
+    res.status(404).json({ message: "Category not found" });
   }
-
-  const deleted = categories[index];
-  categories.splice(index, 1);
-
-  res.json({
-    message: "Category deleted successfully",
-    deleted,
-  });
 };
